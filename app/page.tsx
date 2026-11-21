@@ -61,7 +61,14 @@ export default function Home() {
         const res = await fetch("/api/plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(profile),
+          body: JSON.stringify({
+            city: profile.city,
+            household: profile.household,
+            commute: profile.commute,
+            commuteKm: profile.commuteKm,
+            exercise: profile.exercise,
+            cooking: profile.cooking,
+          }),
           signal: controller.signal,
         });
         const data = await res.json();
@@ -81,10 +88,18 @@ export default function Home() {
     }, 500);
 
     return () => clearTimeout(timer);
-    // profile is compared by value, not identity — JSON.stringify keeps the
-    // debounce from re-firing on every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(profile)]);
+    // Depend on profile's primitive fields, not the object itself — profile
+    // is replaced wholesale on every change, so an object-identity dependency
+    // would re-fire the debounce on every render.
+  }, [
+    profile.city,
+    profile.household,
+    profile.commute,
+    profile.commuteKm,
+    profile.exercise,
+    profile.cooking,
+    cityMissing,
+  ]);
 
   return (
     <DashboardShell

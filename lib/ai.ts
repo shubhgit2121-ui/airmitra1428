@@ -99,7 +99,12 @@ export async function generatePlan(aqi: AqiData, profile: Profile): Promise<Smog
   });
 
   const raw = completion.choices[0]?.message?.content ?? "{}";
-  const parsed = JSON.parse(raw) as Partial<SmogPlan>;
+  let parsed: Partial<SmogPlan>;
+  try {
+    parsed = JSON.parse(raw) as Partial<SmogPlan>;
+  } catch {
+    throw new Error("The AI returned an invalid plan. Please try again.");
+  }
 
   return {
     headline: parsed.headline ?? "Today's air needs a few smart moves",

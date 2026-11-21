@@ -3,6 +3,8 @@
 // a single-instance deployment; not a substitute for an edge/WAF rate limit
 // under real multi-instance load.
 
+import { NextResponse } from "next/server";
+
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS_PER_WINDOW = 20;
 
@@ -28,4 +30,11 @@ export function rateLimit(key: string): { ok: boolean; retryAfterSeconds?: numbe
 export function clientKeyFor(req: Request): string {
   const forwardedFor = req.headers.get("x-forwarded-for");
   return forwardedFor?.split(",")[0]?.trim() || "unknown";
+}
+
+export function rateLimitResponse(result: { retryAfterSeconds?: number }) {
+  return NextResponse.json(
+    { error: "Too many requests. Please slow down and try again shortly." },
+    { status: 429, headers: { "Retry-After": String(result.retryAfterSeconds ?? 60) } }
+  );
 }
