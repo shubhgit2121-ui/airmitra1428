@@ -89,8 +89,8 @@ export default function ProfileSidebar({
           />
         </div>
 
-        <div className={field}>
-          <span className={label}>Household</span>
+        <fieldset className={field + " border-0 p-0 m-0"}>
+          <legend className={label}>Household</legend>
           <div className="flex flex-wrap gap-1.5">
             {HOUSEHOLD_OPTIONS.map((o) => {
               const active = profile.household.includes(o.tag);
@@ -99,6 +99,7 @@ export default function ProfileSidebar({
                   type="button"
                   key={o.tag}
                   onClick={() => toggleHousehold(o.tag)}
+                  aria-pressed={active}
                   className={
                     "rounded-full border px-3 py-1 text-xs font-medium transition " +
                     (active
@@ -111,7 +112,7 @@ export default function ProfileSidebar({
               );
             })}
           </div>
-        </div>
+        </fieldset>
 
         <div className={field}>
           <label className={label} htmlFor="commute">

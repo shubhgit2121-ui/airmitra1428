@@ -19,11 +19,25 @@ const POLLUTANT_LABELS: Record<string, string> = {
   co: "CO",
 };
 
+// Short-lived cache so re-generating a plan after only tweaking non-city
+// profile fields (household, commute, exercise, cooking) doesn't re-hit the
+// upstream station API — the reading doesn't change meaningfully within a
+// minute, and WAQI's free tier is rate-limited.
+const CACHE_TTL_MS = 60_000;
+const cache = new Map<string, { data: AqiData; expiresAt: number }>();
+
 /**
  * Fetch live air quality for a city from the WAQI API (aqicn.org).
  * Falls back to a clear error that the caller can surface to the user.
  */
 export async function fetchAqi(city: string): Promise<AqiData> {
+  const normalizedCity = city.trim();
+  const cacheKey = normalizedCity.toLowerCase();
+  const cached = cache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   const token = process.env.WAQI_TOKEN;
   if (!token) {
     throw new Error(
@@ -32,7 +46,7 @@ export async function fetchAqi(city: string): Promise<AqiData> {
   }
 
   const url = `https://api.waqi.info/feed/${encodeURIComponent(
-    city.trim()
+    normalizedCity
   )}/?token=${token}`;
 
   const res = await fetch(url, { cache: "no-store" });
@@ -78,8 +92,8 @@ export async function fetchAqi(city: string): Promise<AqiData> {
     pm25Avg: typeof day.avg === "number" ? day.avg : null,
   }));
 
-  return {
-    city: d.city?.name ?? city,
+  const result: AqiData = {
+    city: d.city?.name ?? normalizedCity,
     aqi: Number.isFinite(aqi) ? aqi : 0,
     category: categoryFor(Number.isFinite(aqi) ? aqi : 0),
     pm25: typeof pm25 === "number" ? pm25 : null,
@@ -88,4 +102,7 @@ export async function fetchAqi(city: string): Promise<AqiData> {
     pollutants,
     forecast,
   };
+
+  cache.set(cacheKey, { data: result, expiresAt: Date.now() + CACHE_TTL_MS });
+  return result;
 }

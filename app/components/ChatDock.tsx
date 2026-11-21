@@ -59,7 +59,12 @@ export default function ChatDock({
   return (
     <div className="fixed inset-x-4 bottom-4 z-20 sm:inset-x-auto sm:right-6 sm:bottom-6">
       {open && (
-        <div className="mb-3 w-full rounded-xl border border-line border-t-2 border-t-jade bg-surface p-5 sm:w-[360px]">
+        <div
+          id="airmitra-chat-panel"
+          role="dialog"
+          aria-label="Ask AirMitra"
+          className="mb-3 w-full rounded-xl border border-line border-t-2 border-t-jade bg-surface p-5 sm:w-[360px]"
+        >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-ink">Ask AirMitra</h3>
             <button
@@ -75,7 +80,13 @@ export default function ChatDock({
           </p>
 
           {messages.length > 0 && (
-            <div ref={scrollRef} className="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1">
+            <div
+              ref={scrollRef}
+              role="log"
+              aria-live="polite"
+              aria-label="Chat messages"
+              className="mt-4 max-h-64 space-y-3 overflow-y-auto pr-1"
+            >
               {messages.map((m, i) => (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                   <p
@@ -86,6 +97,9 @@ export default function ChatDock({
                         : "bg-jade-soft text-ink")
                     }
                   >
+                    <span className="sr-only">
+                      {m.role === "user" ? "You: " : "AirMitra: "}
+                    </span>
                     {m.content}
                   </p>
                 </div>
@@ -121,6 +135,7 @@ export default function ChatDock({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question…"
+              aria-label="Type your question for AirMitra"
               className="flex-1 border-0 bg-transparent text-sm text-ink outline-none placeholder:text-ink-soft/50"
             />
             <button
@@ -136,6 +151,8 @@ export default function ChatDock({
 
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="airmitra-chat-panel"
         className="w-full rounded-full border border-line bg-ink px-5 py-3 text-sm font-semibold text-paper transition hover:bg-jade sm:w-auto"
       >
         {open ? "Close" : "Ask AirMitra"}

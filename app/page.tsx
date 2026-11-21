@@ -41,12 +41,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  const cityMissing = !profile.city.trim();
+  const displayError = cityMissing ? "Enter a city to see its air quality." : error;
+
   useEffect(() => {
-    const city = profile.city.trim();
-    if (!city) {
-      setError("Enter a city to see its air quality.");
-      return;
-    }
+    if (cityMissing) return;
 
     const timer = setTimeout(async () => {
       abortRef.current?.abort();
@@ -98,9 +97,9 @@ export default function Home() {
         />
       }
     >
-      {error && (
+      {displayError && (
         <p className="mb-6 border-l-2 border-[#bf4b3c] pl-4 text-sm text-[#963a2e]">
-          {error}
+          {displayError}
         </p>
       )}
 
@@ -142,7 +141,7 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        !error && <DashboardSkeleton />
+        !displayError && <DashboardSkeleton />
       )}
 
       {result && <ChatDock profile={profile} aqi={result.aqi} />}

@@ -36,10 +36,14 @@ export default function PlanCard({ plan }: { plan: SmogPlan }) {
     <div className="rounded-xl border border-line bg-surface p-6">
       <h2 className="text-xl font-black tracking-tight text-ink">{plan.headline}</h2>
 
-      <div className="mt-5 flex flex-wrap gap-5 border-b border-line">
+      <div role="tablist" aria-label="Plan categories" className="mt-5 flex flex-wrap gap-5 border-b border-line">
         {tabs.map((t, i) => (
           <button
             key={t.key}
+            id={`tab-${t.key}`}
+            role="tab"
+            aria-selected={current.key === t.key}
+            aria-controls={`panel-${t.key}`}
             onClick={() => setActive(i)}
             className={
               "-mb-px border-b-2 pb-3 text-sm font-semibold transition " +
@@ -53,7 +57,12 @@ export default function PlanCard({ plan }: { plan: SmogPlan }) {
         ))}
       </div>
 
-      <ul className="mt-2">
+      <ul
+        id={`panel-${current.key}`}
+        role="tabpanel"
+        aria-labelledby={`tab-${current.key}`}
+        className="mt-2"
+      >
         {current.tips.map((t, i) => (
           <TipRow key={i} tip={t} accent={current.accent} />
         ))}
