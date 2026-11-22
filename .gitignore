@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal docs — excluded from the repo (README.md is kept)
+AGENTS.md
+DASHBOARD_PLAN.md
+docs/design.md
