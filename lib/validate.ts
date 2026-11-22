@@ -30,8 +30,8 @@ const COOKING_FUELS: CookingFuel[] = ["lpg", "biomass", "electric"];
 
 export class ValidationError extends Error {}
 
-function isOneOf<T extends string>(value: unknown, allowed: T[]): value is T {
-  return typeof value === "string" && (allowed as string[]).includes(value);
+function isOneOf<T extends string>(value: unknown, allowed: readonly T[]): value is T {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value);
 }
 
 export function validateProfile(input: unknown): Profile {

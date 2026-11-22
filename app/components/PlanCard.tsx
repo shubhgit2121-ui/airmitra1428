@@ -45,12 +45,11 @@ export default function PlanCard({ plan }: { plan: SmogPlan }) {
             aria-selected={current.key === t.key}
             aria-controls={`panel-${t.key}`}
             onClick={() => setActive(i)}
-            className={
-              "-mb-px border-b-2 pb-3 text-sm font-semibold transition " +
-              (current.key === t.key
+            className={`-mb-px border-b-2 pb-3 text-sm font-semibold transition ${
+              current.key === t.key
                 ? "border-ink text-ink"
-                : "border-transparent text-ink-soft hover:text-ink")
-            }
+                : "border-transparent text-ink-soft hover:text-ink"
+            }`}
           >
             {t.label}
           </button>
@@ -63,8 +62,8 @@ export default function PlanCard({ plan }: { plan: SmogPlan }) {
         aria-labelledby={`tab-${current.key}`}
         className="mt-2"
       >
-        {current.tips.map((t, i) => (
-          <TipRow key={i} tip={t} accent={current.accent} />
+        {current.tips.map((t) => (
+          <TipRow key={`${current.key}-${t.title}`} tip={t} accent={current.accent} />
         ))}
       </ul>
     </div>

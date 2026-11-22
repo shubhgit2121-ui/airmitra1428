@@ -109,12 +109,11 @@ export default function ChatDock({
               {messages.map((m, i) => (
                 <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
                   <p
-                    className={
-                      "inline-block max-w-[85%] rounded-lg px-3.5 py-2 text-sm " +
-                      (m.role === "user"
+                    className={`inline-block max-w-[85%] rounded-lg px-3.5 py-2 text-sm ${
+                      m.role === "user"
                         ? "bg-ink text-paper"
-                        : "bg-jade-soft text-ink")
-                    }
+                        : "bg-jade-soft text-ink"
+                    }`}
                   >
                     <span className="sr-only">
                       {m.role === "user" ? "You: " : "AirMitra: "}

@@ -71,10 +71,9 @@ export default function Home() {
 
           <div
             aria-busy={loading}
-            className={
-              "space-y-6 transition-opacity duration-300 " +
-              (loading ? "pointer-events-none opacity-40" : "opacity-100")
-            }
+            className={`space-y-6 transition-opacity duration-300 ${
+              loading ? "pointer-events-none opacity-40" : "opacity-100"
+            }`}
           >
             <AqiHeroCard aqi={result.aqi} summary={result.plan.aqiSummary} loading={loading} />
 

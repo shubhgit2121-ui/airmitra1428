@@ -6,6 +6,42 @@ import type {
   Profile,
 } from "@/lib/types";
 
+type SelectOption<T> = { value: T; label: string };
+
+function SelectField<T extends string>({
+  id,
+  label: labelText,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: T;
+  options: SelectOption<T>[];
+  onChange: (val: T) => void;
+}) {
+  return (
+    <div className={STYLES.field}>
+      <label className={STYLES.label} htmlFor={id}>
+        {labelText}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        className={STYLES.select}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 const HOUSEHOLD_OPTIONS: { tag: HouseholdTag; label: string }[] = [
   { tag: "young_kids", label: "Young kids" },
   { tag: "elderly", label: "Elderly" },
@@ -32,12 +68,14 @@ const COOKING_OPTIONS: { value: CookingFuel; label: string }[] = [
   { value: "electric", label: "Electric / induction" },
 ];
 
-const field = "mb-5";
-const label = "mb-1.5 block text-xs font-semibold text-ink-soft";
-const selectCls =
-  "w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-jade";
-const inputCls =
-  "w-full border-0 border-b border-line bg-transparent pb-1 text-lg font-semibold text-ink outline-none placeholder:text-ink-soft/50 focus:border-jade";
+const STYLES = {
+  field: "mb-5",
+  label: "mb-1.5 block text-xs font-semibold text-ink-soft",
+  select:
+    "w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none focus:border-jade",
+  input:
+    "w-full border-0 border-b border-line bg-transparent pb-1 text-lg font-semibold text-ink outline-none placeholder:text-ink-soft/50 focus:border-jade",
+};
 
 export default function ProfileSidebar({
   profile,
@@ -76,8 +114,8 @@ export default function ProfileSidebar({
       </p>
 
       <div className="mt-7">
-        <div className={field}>
-          <label className={label} htmlFor="city">
+        <div className={STYLES.field}>
+          <label className={STYLES.label} htmlFor="city">
             City
           </label>
           <input
@@ -85,12 +123,12 @@ export default function ProfileSidebar({
             value={profile.city}
             onChange={(e) => set("city", e.target.value)}
             placeholder="Delhi, Mumbai, Beijing…"
-            className={inputCls}
+            className={STYLES.input}
           />
         </div>
 
-        <fieldset className={field + " border-0 p-0 m-0"}>
-          <legend className={label}>Household</legend>
+        <fieldset className={`${STYLES.field} border-0 p-0 m-0`}>
+          <legend className={STYLES.label}>Household</legend>
           <div className="flex flex-wrap gap-1.5">
             {HOUSEHOLD_OPTIONS.map((o) => {
               const active = profile.household.includes(o.tag);
@@ -114,15 +152,15 @@ export default function ProfileSidebar({
           </div>
         </fieldset>
 
-        <div className={field}>
-          <label className={label} htmlFor="commute">
+        <div className={STYLES.field}>
+          <label className={STYLES.label} htmlFor="commute">
             Commute
           </label>
           <select
             id="commute"
             value={profile.commute}
             onChange={(e) => set("commute", e.target.value as CommuteMode)}
-            className={selectCls}
+            className={STYLES.select}
           >
             {COMMUTE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -136,42 +174,33 @@ export default function ProfileSidebar({
               min={0}
               max={200}
               value={profile.commuteKm}
-              onChange={(e) =>
-                set("commuteKm", Number.isFinite(parseFloat(e.target.value)) ? parseFloat(e.target.value) : 0)
-              }
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                set("commuteKm", Number.isFinite(val) ? val : 0);
+              }}
               className="w-16 rounded-md border border-line bg-paper px-2 py-1.5 text-ink outline-none focus:border-jade"
             />
             km one-way
           </label>
         </div>
 
-        <div className={field}>
-          <label className={label} htmlFor="exercise">
-            Outdoor exercise
-          </label>
-          <select
-            id="exercise"
-            value={profile.exercise}
-            onChange={(e) => set("exercise", e.target.value as ExerciseHabit)}
-            className={selectCls}
-          >
-            {EXERCISE_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          id="exercise"
+          label="Outdoor exercise"
+          value={profile.exercise}
+          options={EXERCISE_OPTIONS}
+          onChange={(val) => set("exercise", val)}
+        />
 
-        <div className={field + " mb-0"}>
-          <label className={label} htmlFor="cooking">
+        <div className={`${STYLES.field} mb-0`}>
+          <label className={STYLES.label} htmlFor="cooking">
             Cooking fuel
           </label>
           <select
             id="cooking"
             value={profile.cooking}
             onChange={(e) => set("cooking", e.target.value as CookingFuel)}
-            className={selectCls}
+            className={STYLES.select}
           >
             {COOKING_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -184,10 +213,9 @@ export default function ProfileSidebar({
 
       <div className="mt-auto flex items-center gap-2 pt-8 text-xs text-ink-soft">
         <span
-          className={
-            "h-1.5 w-1.5 rounded-full " +
-            (loading ? "bg-marigold animate-pulse" : "bg-jade")
-          }
+          className={`h-1.5 w-1.5 rounded-full ${
+            loading ? "bg-marigold animate-pulse" : "bg-jade"
+          }`}
         />
         {loading ? "Reading today's air…" : updated ? `Updated ${updated}` : "Waiting for a city"}
       </div>

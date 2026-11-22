@@ -10,14 +10,14 @@ export function categoryFor(aqi: number): string {
   return "Hazardous";
 }
 
-const POLLUTANT_LABELS: Record<string, string> = {
+const POLLUTANT_LABELS = {
   pm25: "PM2.5",
   pm10: "PM10",
   o3: "Ozone",
   no2: "NO₂",
   so2: "SO₂",
   co: "CO",
-};
+} as const;
 
 // Short-lived cache so re-generating a plan after only tweaking non-city
 // profile fields (household, commute, exercise, cooking) doesn't re-hit the
@@ -80,10 +80,13 @@ export async function fetchAqi(city: string): Promise<AqiData> {
   const aqi = typeof d.aqi === "number" ? d.aqi : Number(d.aqi);
   const pm25 = d.iaqi?.pm25?.v ?? null;
   const dominant = d.dominentpol
-    ? POLLUTANT_LABELS[d.dominentpol] ?? d.dominentpol.toUpperCase()
+    ? (POLLUTANT_LABELS[d.dominentpol as keyof typeof POLLUTANT_LABELS] ??
+        d.dominentpol.toUpperCase())
     : null;
 
-  const pollutants: PollutantReading[] = Object.entries(POLLUTANT_LABELS)
+  const pollutants: PollutantReading[] = (
+    Object.entries(POLLUTANT_LABELS) as Array<[string, string]>
+  )
     .filter(([key]) => typeof d.iaqi?.[key]?.v === "number")
     .map(([key, label]) => ({ key, label, value: d.iaqi![key].v }));
 

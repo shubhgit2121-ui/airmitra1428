@@ -15,39 +15,41 @@ function getClient(): { client: OpenAI; model: string } {
   return { client, model };
 }
 
-const HOUSEHOLD_LABELS: Record<string, string> = {
-  young_kids: "young children",
-  elderly: "elderly members",
-  respiratory: "someone with asthma / a respiratory condition",
-  pregnant: "a pregnant member",
-  none: "no especially sensitive members",
-};
-const COMMUTE_LABELS: Record<string, string> = {
-  car: "commutes by car/bike (petrol/diesel)",
-  transit: "commutes by public transit",
-  walk_cycle: "walks or cycles",
-  wfh: "works from home",
-};
-const EXERCISE_LABELS: Record<string, string> = {
-  morning: "exercises outdoors in the morning",
-  evening: "exercises outdoors in the evening",
-  none: "does not exercise outdoors",
-};
-const COOKING_LABELS: Record<string, string> = {
-  lpg: "cooks on LPG/gas",
-  biomass: "cooks on wood/biomass",
-  electric: "cooks on electric/induction",
-};
+const PROFILE_LABELS = {
+  household: {
+    young_kids: "young children",
+    elderly: "elderly members",
+    respiratory: "someone with asthma / a respiratory condition",
+    pregnant: "a pregnant member",
+    none: "no especially sensitive members",
+  },
+  commute: {
+    car: "commutes by car/bike (petrol/diesel)",
+    transit: "commutes by public transit",
+    walk_cycle: "walks or cycles",
+    wfh: "works from home",
+  },
+  exercise: {
+    morning: "exercises outdoors in the morning",
+    evening: "exercises outdoors in the evening",
+    none: "does not exercise outdoors",
+  },
+  cooking: {
+    lpg: "cooks on LPG/gas",
+    biomass: "cooks on wood/biomass",
+    electric: "cooks on electric/induction",
+  },
+} as const;
 
 function describeProfile(p: Profile): string {
   const hh = p.household.length
-    ? p.household.map((h) => HOUSEHOLD_LABELS[h]).join(", ")
+    ? p.household.map((h) => PROFILE_LABELS.household[h]).join(", ")
     : "unspecified household";
   return [
     `Household includes: ${hh}.`,
-    `${COMMUTE_LABELS[p.commute]} (about ${p.commuteKm} km one way).`,
-    `${EXERCISE_LABELS[p.exercise]}.`,
-    `${COOKING_LABELS[p.cooking]}.`,
+    `${PROFILE_LABELS.commute[p.commute]} (about ${p.commuteKm} km one way).`,
+    `${PROFILE_LABELS.exercise[p.exercise]}.`,
+    `${PROFILE_LABELS.cooking[p.cooking]}.`,
   ].join(" ");
 }
 

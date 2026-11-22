@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
     "AirMitra turns live air-quality data into a personalized daily action plan for your household — low-emission routines, indoor air hacks, and sustainable swaps, with the impact of every choice made clear.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${archivo.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
