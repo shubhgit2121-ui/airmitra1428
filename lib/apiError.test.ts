@@ -16,7 +16,7 @@ describe("errorResponse", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = errorResponse("/api/test", new Error("boom"));
     expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: "boom" });
+    expect(await res.json()).toEqual({ error: "Something went wrong." });
     expect(spy).toHaveBeenCalledWith("[/api/test]", expect.any(Error));
     spy.mockRestore();
   });
