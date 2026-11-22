@@ -1,6 +1,7 @@
 import type { ForecastDay } from "@/lib/types";
 import { categoryFor } from "@/lib/aqi";
 import { aqiStyle } from "@/lib/ui";
+import { CHART_MIN_SCALE, FORECAST_MIN_HEIGHT_PCT } from "@/lib/constants";
 
 const DAY_LABEL = new Intl.DateTimeFormat(undefined, { weekday: "short" });
 
@@ -8,7 +9,7 @@ export default function ForecastCard({ forecast }: { forecast: ForecastDay[] }) 
   const days = forecast.filter((d) => d.pm25Avg != null).slice(0, 7);
   if (!days.length) return null;
 
-  const max = Math.max(...days.map((d) => d.pm25Avg as number), 10);
+  const max = Math.max(...days.map((d) => d.pm25Avg as number), CHART_MIN_SCALE);
 
   return (
     <div className="rounded-xl border border-line bg-surface p-6">
@@ -16,7 +17,7 @@ export default function ForecastCard({ forecast }: { forecast: ForecastDay[] }) 
       <ul className="mt-5 flex items-end gap-3">
         {days.map((d) => {
           const value = d.pm25Avg as number;
-          const heightPct = Math.max((value / max) * 100, 8);
+          const heightPct = Math.max((value / max) * 100, FORECAST_MIN_HEIGHT_PCT);
           const color = aqiStyle(categoryFor(value)).hex;
           const date = new Date(d.date);
           const label = Number.isNaN(date.getTime()) ? d.date : DAY_LABEL.format(date);

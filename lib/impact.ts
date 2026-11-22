@@ -1,4 +1,5 @@
 import type { AqiData, ImpactMeter, Profile } from "./types";
+import { DECIMAL_PRECISION, ROUND_TRIP_MULTIPLIER } from "./constants";
 
 // Berkeley Earth rule of thumb: breathing ~22 µg/m³ of PM2.5 for 24h
 // is roughly equivalent to smoking 1 cigarette.
@@ -33,7 +34,8 @@ function estimatePm25FromAqi(aqi: number): number {
 
 export function computeImpact(aqi: AqiData, profile: Profile): ImpactMeter {
   const pm25 = aqi.pm25 ?? estimatePm25FromAqi(aqi.aqi);
-  const cigarettes = Math.round((pm25 / PM25_PER_CIGARETTE) * 10) / 10;
+  const cigarettes =
+    Math.round((pm25 / PM25_PER_CIGARETTE) * DECIMAL_PRECISION) / DECIMAL_PRECISION;
 
   const sensitive = profile.household.some(
     (h) => h === "young_kids" || h === "elderly" || h === "respiratory" || h === "pregnant"
@@ -53,9 +55,11 @@ export function computeImpact(aqi: AqiData, profile: Profile): ImpactMeter {
   // its own emission factor, so the figure actually moves when the mode does:
   // car itself saves nothing (you're still driving); transit is lower-carbon
   // but not zero; walking/cycling and not commuting at all are zero-emission.
-  const roundTripKm = Math.max(0, profile.commuteKm) * 2;
-  const drivingCo2 = Math.round(roundTripKm * CAR_KG_CO2_PER_KM * 10) / 10;
-  const transitCo2 = Math.round(roundTripKm * TRANSIT_KG_CO2_PER_KM * 10) / 10;
+  const roundTripKm = Math.max(0, profile.commuteKm) * ROUND_TRIP_MULTIPLIER;
+  const drivingCo2 =
+    Math.round(roundTripKm * CAR_KG_CO2_PER_KM * DECIMAL_PRECISION) / DECIMAL_PRECISION;
+  const transitCo2 =
+    Math.round(roundTripKm * TRANSIT_KG_CO2_PER_KM * DECIMAL_PRECISION) / DECIMAL_PRECISION;
 
   let co2SavedKg = 0;
   let co2Note = "";
@@ -64,11 +68,14 @@ export function computeImpact(aqi: AqiData, profile: Profile): ImpactMeter {
       co2SavedKg = 0;
       co2Note =
         drivingCo2 > 0
-          ? `Switching today's ${roundTripKm} km round-trip from car to public transit would cut about ${Math.round((drivingCo2 - transitCo2) * 10) / 10} kg CO₂ — and keep you out of roadside pollution peaks.`
+          ? `Switching today's ${roundTripKm} km round-trip from car to public transit would cut about ${Math.round((drivingCo2 - transitCo2) * DECIMAL_PRECISION) / DECIMAL_PRECISION} kg CO₂ — and keep you out of roadside pollution peaks.`
           : `Leaving the car home on high-pollution days avoids tailpipe emissions and your own roadside exposure.`;
       break;
     case "transit":
-      co2SavedKg = Math.max(0, Math.round((drivingCo2 - transitCo2) * 10) / 10);
+      co2SavedKg = Math.max(
+        0,
+        Math.round((drivingCo2 - transitCo2) * DECIMAL_PRECISION) / DECIMAL_PRECISION
+      );
       co2Note = `By taking public transit instead of driving, you're already avoiding about ${co2SavedKg} kg CO₂ today — transit still emits some, just far less per person than a car.`;
       break;
     case "walk_cycle":

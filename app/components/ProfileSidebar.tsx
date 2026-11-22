@@ -5,6 +5,7 @@ import type {
   HouseholdTag,
   Profile,
 } from "@/lib/types";
+import { MAX_COMMUTE_KM } from "@/lib/constants";
 
 type SelectOption<T> = { value: T; label: string };
 
@@ -172,7 +173,7 @@ export default function ProfileSidebar({
             <input
               type="number"
               min={0}
-              max={200}
+              max={MAX_COMMUTE_KM}
               value={profile.commuteKm}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);

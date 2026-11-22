@@ -1,4 +1,5 @@
 import type { PollutantReading } from "@/lib/types";
+import { CHART_MIN_SCALE, POLLUTANT_MIN_WIDTH_PCT } from "@/lib/constants";
 
 export default function PollutantBreakdownCard({
   pollutants,
@@ -9,7 +10,7 @@ export default function PollutantBreakdownCard({
 }) {
   if (!pollutants.length) return null;
 
-  const max = Math.max(...pollutants.map((p) => p.value), 10);
+  const max = Math.max(...pollutants.map((p) => p.value), CHART_MIN_SCALE);
 
   return (
     <div className="rounded-xl border border-line bg-surface p-6">
@@ -17,7 +18,7 @@ export default function PollutantBreakdownCard({
       <ul className="mt-4 space-y-3">
         {pollutants.map((p) => {
           const isDominant = p.label === dominant;
-          const widthPct = Math.max((p.value / max) * 100, 4);
+          const widthPct = Math.max((p.value / max) * 100, POLLUTANT_MIN_WIDTH_PCT);
           return (
             <li
               key={p.key}

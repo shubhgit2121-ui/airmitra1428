@@ -12,6 +12,7 @@ import type {
   HouseholdTag,
   Profile,
 } from "./types";
+import { MAX_COMMUTE_KM } from "./constants";
 
 export const MAX_CITY_LENGTH = 80;
 export const MAX_CHAT_MESSAGES = 20;
@@ -61,7 +62,7 @@ export function validateProfile(input: unknown): Profile {
 
   const commuteKmRaw = typeof p.commuteKm === "number" ? p.commuteKm : Number(p.commuteKm);
   const commuteKm = Number.isFinite(commuteKmRaw)
-    ? Math.min(Math.max(commuteKmRaw, 0), 200)
+    ? Math.min(Math.max(commuteKmRaw, 0), MAX_COMMUTE_KM)
     : 0;
 
   return {

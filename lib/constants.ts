@@ -18,3 +18,11 @@ export const DEFAULT_PROFILE: Profile = {
   exercise: "morning",
   cooking: "lpg",
 };
+
+// Chart and visualization constants
+export const CHART_MIN_SCALE = 10;
+export const FORECAST_MIN_HEIGHT_PCT = 8;
+export const POLLUTANT_MIN_WIDTH_PCT = 4;
+export const DECIMAL_PRECISION = 10;
+export const ROUND_TRIP_MULTIPLIER = 2;
+export const MAX_COMMUTE_KM = 200;
