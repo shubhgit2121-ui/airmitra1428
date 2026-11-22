@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AqiData, ChatMessage, Profile } from "@/lib/types";
 
 const SUGGESTIONS = [
@@ -21,6 +21,21 @@ export default function ChatDock({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  // When the panel opens, move focus into it; when it closes, return focus to
+  // the toggle. Escape closes the panel from anywhere inside it.
+  useEffect(() => {
+    if (open) {
+      inputRef.current?.focus();
+    }
+  }, [open]);
+
+  function close() {
+    setOpen(false);
+    toggleRef.current?.focus();
+  }
 
   async function send(text: string) {
     const q = text.trim();
@@ -62,13 +77,17 @@ export default function ChatDock({
         <div
           id="airmitra-chat-panel"
           role="dialog"
+          aria-modal="false"
           aria-label="Ask AirMitra"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") close();
+          }}
           className="mb-3 w-full rounded-xl border border-line border-t-2 border-t-jade bg-surface p-5 sm:w-[360px]"
         >
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-ink">Ask AirMitra</h3>
             <button
-              onClick={() => setOpen(false)}
+              onClick={close}
               aria-label="Close chat"
               className="text-ink-soft hover:text-ink"
             >
@@ -132,6 +151,7 @@ export default function ChatDock({
             className="mt-4 flex gap-3 border-b border-line pb-2"
           >
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question…"
@@ -150,7 +170,8 @@ export default function ChatDock({
       )}
 
       <button
-        onClick={() => setOpen((v) => !v)}
+        ref={toggleRef}
+        onClick={() => (open ? close() : setOpen(true))}
         aria-expanded={open}
         aria-controls="airmitra-chat-panel"
         className="w-full rounded-full border border-line bg-ink px-5 py-3 text-sm font-semibold text-paper transition hover:bg-jade sm:w-auto"

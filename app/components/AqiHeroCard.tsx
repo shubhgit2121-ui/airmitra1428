@@ -22,14 +22,23 @@ export default function AqiHeroCard({
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-ink-soft">{aqi.city}</p>
             {loading && (
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink-soft" />
+              <span
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink-soft"
+                aria-hidden="true"
+              />
             )}
           </div>
-          <div className="mt-1 flex items-baseline gap-3">
-            <span className="text-7xl font-black leading-none tracking-tight text-ink tabular-nums">
+          <div
+            className="mt-1 flex items-baseline gap-3"
+            aria-label={`US AQI ${aqi.aqi}, ${aqi.category}`}
+          >
+            <span
+              className="text-7xl font-black leading-none tracking-tight text-ink tabular-nums"
+              aria-hidden="true"
+            >
               {aqi.aqi}
             </span>
-            <div className="pb-1">
+            <div className="pb-1" aria-hidden="true">
               <p className="text-sm font-medium text-ink-soft">US AQI</p>
               <p className={`text-lg font-bold ${s.badgeText}`}>{aqi.category}</p>
             </div>

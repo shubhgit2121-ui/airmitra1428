@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import DashboardShell from "./components/DashboardShell";
 import ProfileSidebar from "./components/ProfileSidebar";
 import AqiHeroCard from "./components/AqiHeroCard";
@@ -9,20 +9,13 @@ import ForecastCard from "./components/ForecastCard";
 import ImpactCard from "./components/ImpactCard";
 import PlanCard from "./components/PlanCard";
 import ChatDock from "./components/ChatDock";
-import type { PlanResponse, Profile } from "@/lib/types";
-
-const DEFAULT_PROFILE: Profile = {
-  city: "Delhi",
-  household: ["young_kids"],
-  commute: "car",
-  commuteKm: 10,
-  exercise: "morning",
-  cooking: "lpg",
-};
+import { usePlan } from "./hooks/usePlan";
+import { DEFAULT_PROFILE } from "@/lib/constants";
+import type { Profile } from "@/lib/types";
 
 function DashboardSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="animate-pulse space-y-6" aria-hidden="true">
       <div className="h-48 rounded-2xl bg-surface" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="h-40 rounded-xl bg-surface" />
@@ -36,70 +29,10 @@ function DashboardSkeleton() {
 
 export default function Home() {
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
-  const [result, setResult] = useState<PlanResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const { result, loading, error } = usePlan(profile);
 
   const cityMissing = !profile.city.trim();
   const displayError = cityMissing ? "Enter a city to see its air quality." : error;
-
-  useEffect(() => {
-    if (cityMissing) return;
-
-    const timer = setTimeout(async () => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      const MIN_LOADING_MS = 500;
-      const startedAt = Date.now();
-
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/plan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            city: profile.city,
-            household: profile.household,
-            commute: profile.commute,
-            commuteKm: profile.commuteKm,
-            exercise: profile.exercise,
-            cooking: profile.cooking,
-          }),
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Could not build your plan.");
-
-        const elapsed = Date.now() - startedAt;
-        if (elapsed < MIN_LOADING_MS) {
-          await new Promise((r) => setTimeout(r, MIN_LOADING_MS - elapsed));
-        }
-        setResult(data as PlanResponse);
-      } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        setError(e instanceof Error ? e.message : "Something went wrong.");
-      } finally {
-        if (abortRef.current === controller) setLoading(false);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-    // Depend on profile's primitive fields, not the object itself — profile
-    // is replaced wholesale on every change, so an object-identity dependency
-    // would re-fire the debounce on every render.
-  }, [
-    profile.city,
-    profile.household,
-    profile.commute,
-    profile.commuteKm,
-    profile.exercise,
-    profile.cooking,
-    cityMissing,
-  ]);
 
   return (
     <DashboardShell
@@ -112,8 +45,15 @@ export default function Home() {
         />
       }
     >
+      <p className="sr-only" role="status" aria-live="polite">
+        {loading ? "Updating your dashboard." : ""}
+      </p>
+
       {displayError && (
-        <p className="mb-6 border-l-2 border-[#bf4b3c] pl-4 text-sm text-[#963a2e]">
+        <p
+          role="alert"
+          className="mb-6 border-l-2 border-[#bf4b3c] pl-4 text-sm text-[#963a2e]"
+        >
           {displayError}
         </p>
       )}
@@ -123,13 +63,14 @@ export default function Home() {
           {loading && (
             <div className="sticky top-6 z-30 mb-6 flex justify-center">
               <div className="flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink">
-                <span className="h-2 w-2 animate-ping rounded-full bg-jade" />
+                <span className="h-2 w-2 animate-ping rounded-full bg-jade" aria-hidden="true" />
                 Updating your dashboard…
               </div>
             </div>
           )}
 
           <div
+            aria-busy={loading}
             className={
               "space-y-6 transition-opacity duration-300 " +
               (loading ? "pointer-events-none opacity-40" : "opacity-100")
