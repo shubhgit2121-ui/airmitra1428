@@ -1,5 +1,7 @@
 # 🌬️ AirMitra — Your family's winter-smog coach
 
+[![CI](https://github.com/shubhgithubrit/airmitra/actions/workflows/ci.yml/badge.svg)](https://github.com/shubhgithubrit/airmitra/actions/workflows/ci.yml)
+
 **AirMitra** is a GenAI-powered assistant that helps families and communities navigate severe
 winter smog and urban air pollution. You tell it your **city**, **who's in your household**, and
 your **daily habits** — it reads **today's live air quality** and generates a personalized
@@ -7,6 +9,10 @@ your **daily habits** — it reads **today's live air quality** and generates a 
 alternatives — and it makes the **direct impact of every choice crystal clear**.
 
 > Built for the GenAI winter-smog / urban air-pollution challenge.
+
+| Dashboard | Ask AirMitra |
+|---|---|
+| ![AirMitra dashboard](public/screenshots/dashboard.png) | ![Ask AirMitra chat panel](public/screenshots/chat.png) |
 
 ---
 
@@ -41,6 +47,39 @@ alternatives — and it makes the **direct impact of every choice crystal clear*
 - **Groq (GPT-OSS 120B)** via the official `openai` SDK's `OpenAI` client, pointed at Groq's API.
 - **WAQI (aqicn.org)** for live AQI.
 - Deployed on **Vercel**.
+
+## 🧱 Architecture
+
+```
+app/
+  page.tsx            — dashboard (client component), wires profile state to usePlan()
+  hooks/usePlan.ts     — debounced fetch of /api/plan, abort-on-change, min-loading-time UX
+  components/          — presentational cards (AQI, forecast, pollutants, impact, plan, chat)
+  api/plan/route.ts    — validates profile, fetches live AQI, asks the model for a plan
+  api/chat/route.ts    — follow-up chat, grounded in the same AQI + profile context
+lib/
+  aqi.ts               — WAQI fetch + short-lived cache
+  ai.ts                — Groq prompt construction (generatePlan, answerFollowUp)
+  impact.ts            — deterministic cigarette/CO₂ math (never hallucinated)
+  validate.ts          — whitelists/bounds every field from untrusted request bodies
+  rateLimit.ts         — in-memory fixed-window limiter for the API routes
+```
+
+Both API routes are the only place secrets (`GROQ_API_KEY`, `WAQI_TOKEN`) are read — the client
+never sees them. Request bodies are revalidated server-side (`lib/validate.ts`) even though the UI
+only ever sends well-formed data, since the routes are public endpoints.
+
+## ✅ Testing
+
+```bash
+npm test              # run the suite once
+npm run test:watch    # watch mode
+npm run test:coverage # with a coverage report
+```
+
+84 tests (Vitest + React Testing Library) cover the pure logic in `lib/` and every component in
+`app/components/`, including network-error and edge-case paths. CI (see badge above) runs lint,
+a full typecheck, the test suite, and a production build on every push.
 
 ## 🚀 Run locally
 
