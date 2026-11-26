@@ -69,4 +69,38 @@ describe("fetchAqi", () => {
 
     await expect(fetchAqi(`unique-city-${Date.now()}`)).rejects.toThrow(/Could not find/);
   });
+
+  it("throws a clear error when the upstream HTTP call fails", async () => {
+    process.env.WAQI_TOKEN = "test-token";
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: async () => ({}),
+    }) as unknown as typeof fetch;
+
+    await expect(fetchAqi(`unique-city-${Date.now()}`)).rejects.toThrow(/HTTP 503/);
+  });
+
+  it("serves a cached reading instead of re-fetching within the TTL", async () => {
+    process.env.WAQI_TOKEN = "test-token";
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "ok",
+        data: {
+          aqi: 80,
+          iaqi: { pm25: { v: 40 } },
+          city: { name: "Cached City" },
+        },
+      }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const city = `cache-city-${Date.now()}`;
+    const first = await fetchAqi(city);
+    const second = await fetchAqi(city);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(second).toEqual(first);
+  });
 });

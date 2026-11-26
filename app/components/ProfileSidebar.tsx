@@ -176,7 +176,7 @@ export default function ProfileSidebar({
               max={MAX_COMMUTE_KM}
               value={profile.commuteKm}
               onChange={(e) => {
-                const val = parseFloat(e.target.value);
+                const val = Number.parseFloat(e.target.value);
                 set("commuteKm", Number.isFinite(val) ? val : 0);
               }}
               className="w-16 rounded-md border border-line bg-paper px-2 py-1.5 text-ink outline-none focus:border-jade"

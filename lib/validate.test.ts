@@ -75,6 +75,11 @@ describe("validateChatMessages", () => {
     );
   });
 
+  it("rejects a non-object entry in the messages array", () => {
+    expect(() => validateChatMessages([null])).toThrow(ValidationError);
+    expect(() => validateChatMessages([42])).toThrow(ValidationError);
+  });
+
   it("caps history length and message length", () => {
     const longHistory = Array.from({ length: MAX_CHAT_MESSAGES + 10 }, (_, i) => ({
       role: "user" as const,

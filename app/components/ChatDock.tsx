@@ -145,7 +145,7 @@ export default function ChatDock({
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              send(input);
+              void send(input);
             }}
             className="mt-4 flex gap-3 border-b border-line pb-2"
           >

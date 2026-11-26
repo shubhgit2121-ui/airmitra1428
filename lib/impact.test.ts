@@ -59,4 +59,9 @@ describe("computeImpact", () => {
     const impact = computeImpact(baseAqi, { ...baseProfile, commute: "walk_cycle", commuteKm: -5 });
     expect(impact.co2SavedKg).toBe(0);
   });
+
+  it("falls back to the worst-case PM2.5 estimate when AQI is outside all known bands", () => {
+    const impact = computeImpact({ ...baseAqi, pm25: null, aqi: 600 }, baseProfile);
+    expect(impact.cigarettesPerDay).toBeCloseTo(500 / 22, 1);
+  });
 });

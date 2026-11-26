@@ -18,7 +18,7 @@ export default defineConfig({
     include: ["lib/**/*.test.{ts,tsx}", "app/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "html"],
+      reporter: ["text", "html", "lcov"],
       include: ["lib/**/*.ts", "app/**/*.tsx"],
       exclude: ["lib/**/*.test.ts", "app/**/*.test.tsx", "**/*.d.ts"],
     },

@@ -67,6 +67,24 @@ describe("ChatDock", () => {
     );
   });
 
+  it("sends a typed message when the form is submitted", async () => {
+    const user = userEvent.setup();
+    render(<ChatDock profile={DEFAULT_PROFILE} aqi={aqi} />);
+    await user.click(screen.getByRole("button", { name: "Ask AirMitra" }));
+
+    const input = screen.getByLabelText("Type your question for AirMitra");
+    await user.type(input, "Should I run the purifier?");
+    await user.click(screen.getByRole("button", { name: "Send" }));
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/chat",
+      expect.objectContaining({ method: "POST" })
+    );
+    await waitFor(() =>
+      expect(screen.getByText("Better to stay indoors today.")).toBeInTheDocument()
+    );
+  });
+
   it("shows a friendly message when the network fails", async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("offline")) as unknown as typeof fetch;
     const user = userEvent.setup();
